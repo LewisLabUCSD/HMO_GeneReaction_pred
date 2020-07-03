@@ -7,10 +7,10 @@ library(openxlsx)
 
 
 ##################
-first_rerun = T
-rerun_all = T
-runSome = T
-rerun_networkVis = T
+first_rerun = F
+rerun_all = F
+runSome = F
+rerun_networkVis = F
 
 aggregate_GC = T
 ####################
@@ -39,6 +39,7 @@ write_scores=F
 
 cluster=F #rerun_networkVis
 cluster_vis=rerun_networkVis
+cluster_vis_movie=rerun_networkVis
 network=rerun_networkVis
 CBX_extend=F
 
@@ -64,21 +65,37 @@ rm_genes = c('POFUT1b','POFUT2a','POFUT2b','FUT8')
 	# gene expression spaggetti plots
 	
 	# split data1,data2,secretor,nonsecretor
-	d1_orig = read.csv('data/raw/data_HMO.data_used_gene1.csv') #sheetName='Data_used_gene1')
-	d1_orig = d1_orig[,!colnames(d1_orig) %in% c("X","Mean","organism","syn","ilmn2")]
+    if(F){ # old
+        d1_orig = read.csv('data/raw/data_HMO.data_used_gene1.csv') #sheetName='Data_used_gene1')
+        d1_orig = d1_orig[,!colnames(d1_orig) %in% c("X","Mean","organism","syn","ilmn2")]
 
-	d2_orig = read.csv('data/raw/data_HMO.data_used_gene2.csv') #sheetName='Data_used_gene1')
+        d2_orig = read.csv('data/raw/data_HMO.data_used_gene2.csv') #sheetName='Data_used_gene1')
+    }
 
-	if(quantile_norm){ # additional normalziation (skipped)
-		library(preprocessCore)
-		d1 = cbind(d1_orig[,1:2],normalize.quantiles(as.matrix(d1_orig[,-(1:2)]))); colnames(d1) = colnames(d1_orig)
-		d2 = cbind(d2_orig[,1:2],normalize.quantiles(as.matrix(d2_orig[,-(1:2)]))); colnames(d2) = colnames(d2_orig)
-	}else{
-		d1=d1_orig; d2=d2_orig
-	}
-	gc = read.csv('data/raw/data_HMO.gene_correspondence.csv')[,1:4] #sheetName='Data_used_gene1')
-	gc[gc=='']=NA
-	gc=na.omit(gc)
+    d1 = read.xlsx('data/raw/data_HMO.xlsx',sheet = 'Gene_of_Interest_corresp_Set1')
+    colnames(d1)[1:5] = c('ilmn','gene','genename','syn','ilmn2')
+    d1 = d1[,c(1,2,grep('^Patient',colnames(d1)))]
+
+    d2 = read.xlsx('data/raw/data_HMO.xlsx',sheet = 'Gene_of_Interest_corresp_Set2') 
+    colnames(d2)[1:5] = c('ilmn','gene','ilmn2','genename','ilmn3')
+    d2 = d2[,-c(3,4,5)]
+    
+    d1 = aggregate(d1[,-(1:2)],by=list(d1$gene),max)
+    colnames(d1)[1] = 'gene'
+
+    d2 = aggregate(d2[,-(1:2)],by=list(d2$gene),max)
+    colnames(d2)[1] = 'gene'
+
+# 	if(quantile_norm){ # additional normalziation (skipped)
+# 		library(preprocessCore)
+# 		d1 = cbind(d1_orig[,1:2],normalize.quantiles(as.matrix(d1_orig[,-(1:2)]))); colnames(d1) = colnames(d1_orig)
+# 		d2 = cbind(d2_orig[,1:2],normalize.quantiles(as.matrix(d2_orig[,-(1:2)]))); colnames(d2) = colnames(d2_orig)
+# 	}else{
+# 		d1=d1_orig; d2=d2_orig
+# 	}
+# 	gc = read.csv('data/raw/data_HMO.gene_correspondence.csv')[,1:4] #sheetName='Data_used_gene1')
+# 	gc[gc=='']=NA
+# 	gc=na.omit(gc)
 	tmp = rbind( cbind( melt(d1,id.vars=c('ilmn','gene')) , ds='d1') , cbind( melt(d2,id.vars=c('ilmn','gene')) , ds='d2') )
 	tmp$expression = as.numeric(as.character(tmp$value))
 	count = rowSums(table(tmp$gene,tmp$ds))
@@ -2267,6 +2284,173 @@ if(cluster_vis){
 	# }
 	# dev.off()
 }
+                     
+if(cluster_vis_movie){
+	# load('data_out/clusters.rda') # out,out2,out3,out4,out5,out6
+	# sel_clust = out6$data12_intersection
+	#el = get_network_edgelist(T); 
+	el = get_network_edgelist(F)
+	dif = get_rxn()
+	el =  data.frame(el,dif,Structure_Choice[[1]]$p_selection_inter,1-Structure_Choice[[1]]$enrichment_inter,
+		1-Structure_Choice[[1]]$enrichment,1-Structure_Choice[[2]]$enrichment,
+		1-Structure_Choice[[1]]$p_selection,Structure_Choice[[2]]$p_selection)
+	colnames(el) = c('reactant_id','product_id','reaction','intersection_proportion','intersection_enrichment','dataset1_enrichment','dataset2_enrichment','dataset1_proportion','dataset2_proportion')
+	el_na = na.omit(el)
+	# weighted_mean_net = aggregate( t( tmp<-(inclusion[,sel_clust$model] * rowMeans(scale(sel_clust[,3:4],center=F))) ) , by=list(sel_clust$cut) , mean)
+	# # median_net = aggregate( t( tmp<-(inclusion[,sel_clust$model] ) ) , by=list(sel_clust$cut) , median)
+	# cluster_score = aggregate( sel_clust[,3:4],by=list(sel_clust$cut),mean)
+	# gscore=ggplot( data=cluster_score , aes(x=model_scores.data1, y=model_scores.data2 ,shape=factor(Group.1),color=factor(Group.1)) )+geom_point()+theme_classic()
+	# # gscore=ggplot( data=sel_clust , aes(x=model_scores.data1, y=model_scores.data2 ,shape=factor(cut),color=factor(cut)) )+geom_point()+geom_density2d()+theme_classic()
+	net_graph = list()
+	mets=get_mets()
+
+	# write.csv(mets,file='figures/networks.metabolites')
+
+	# probability and enrichment
+	g = graph_from_edgelist(as.matrix(el_na[,1:2]))
+	E(g)$propotion_inter = el_na[,4]
+	E(g)$enrichment_inter = el_na[,5]
+	E(g)$enrichment1 = el_na[,6]
+	E(g)$enrichment2 = el_na[,7]
+	E(g)$weight = E(g)$propotion_inter +E(g)$propotion_inter*E(g)$enrichment_inter
+	E(g)$weight = E(g)$weight/max(E(g)$weight)
+	#E(g)$color = rainbow(10)[factor(el_na[,3])]
+	E(g)$color = c('gold3','gold3','red','red','red','blue','blue','purple','purple','grey')[factor(el_na[,3])]
+	#E(g)$color = apply(data.frame(E(g)$color,E(g)$weight),1,function(x) adjustcolor(x[1],x[2]))
+	E(g)$color = apply(data.frame(E(g)$color,2^(E(g)$weight)/(max(2^(E(g)$weight)))),1,function(x) adjustcolor(x[1],x[2]))
+	E(g)$lty = c(1,2,1,2,3,1,2,1,2,1)[factor(el_na[,3])]
+	#E(g)$weight = ifelse(E(g)$weight==0,NA,E(g)$weight)
+	V(g)$weight = strength(g)/degree(g)
+	V(g)$name_num = 1:101
+	known = data.frame(id=c(97:101,3,4,6,7,5,11,13,18,15,21,31, 28,29,39,57,58,46,48,49,60,56,69,72,79,78,80,81,70,76,77,89,90,91,92,96,95,94,93),
+		name=gsub('\\;HMO\\[c\\]','',c(mets[97:101],'2FL','3FL','LNT','LNnT','3SL','LNFPI','LNFPII','LNFPIII','LSTb','LSTc','DSLNT',
+			paste0('DFLNT',1:3),paste0('FLNH',1:7),paste0('DFLNH',1:7),paste0('DSLNH',1:3),paste0('FDSLNH',1:7) )))
+	V(g)$label = sapply(V(g)$name_num,function(i){ ifelse(i %in% known$id[1:16], as.character(known$name[known$id==i]) , i ) })
+	V(g)$label_all = sapply(V(g)$name_num,function(i){ ifelse(i %in% known$id, as.character(known$name[known$id==i]) , i ) })
+	tmp = sapply(shortest_paths(g,from=V(g)[1])$vpath,length)
+	tmp[1] = 1
+	V(g)$depth = tmp
+	V(g)$depth_norm = tmp/max(tmp)
+	V(g)$weight_norm = V(g)$weight/V(g)$depth_norm
+
+
+	# path weight distribution
+	paths=all_simple_paths(g,from=1,to=known$id[1:16])
+	weights = unlist(lapply(paths,function(p) sum(E(g,path=p)$weight)))
+	term = 	unlist(lapply(paths,function(p) as.character(rev(p)[1])))
+	paths_char = unlist(lapply(paths,function(p) paste(as.character(p),collapse='->') ) )
+	df = data.frame(term,weights,percentile=ecdf(weights)(weights),percentile_term=weights,percentile_term_q=weights,paths=paths_char)	
+	for(t in unique(term)){
+		if(sum(df$term==t)<=2){
+			df$percentile_term[df$term==t] = 1
+			# df$percentile_term_q[df$term==t] = 0
+		}else{
+			df$percentile_term[df$term==t] = (ecdf(df$weights[df$term==t])(df$weights[df$term==t]))
+			# df$percentile_term_q[df$term==t] = p.adjust(1-df$percentile_term[df$term==t],'fdr')			
+		}
+	}
+	sel=sort(unique(unlist(strsplit(as.character(df[ df$percentile_term>.95 , 'paths']),'->'))))
+	V(g)$frame.color = ifelse(1:length(V(g)) %in% sel,'black',NA)
+
+
+
+	#if(!'lay'%in%objects()){
+		lay = layout_as_tree(g)
+	#	lay[,2] = lay[,2]+runif(nrow(lay))/2
+		lay[,1] = lay[,1]*10
+	#}
+
+# 	pdf('figures/networks.prob.enrich.pdf',width=15,height=15)
+# 	par(mfrow=c(2,2),mar=c(0,0,0,0))
+# 	plot(g,layout=lay,
+# 		edge.width=E(g)$propotion_inter*5,edge.arrow.size=0,edge.color='grey',edge.lty=1,
+# 		vertex.size=5,vertex.label.cex=.5,vertex.label.family='sans',
+# 		vertex.color=NA,vertex.frame.color=NA)
+# 	plot(g,layout=lay,
+# 		edge.width=E(g)$enrichment_inter*5,edge.arrow.size=0,edge.color='grey',edge.lty=1,
+# 		vertex.size=5,vertex.label.cex=.5,vertex.label.family='sans',
+# 		vertex.color=NA,vertex.frame.color=NA)
+# 	plot(g,layout=lay,
+# 		edge.width=E(g)$weight*5,edge.arrow.size=0,edge.color='grey',edge.lty=1,
+# 		vertex.size=5,vertex.label.cex=.5,vertex.label.family='sans',
+# 		vertex.color=NA,vertex.frame.color=NA)
+# 	plot(g,layout=lay,
+# 		edge.width=E(g)$weight*5,edge.arrow.size=0,edge.color=E(g)$color,
+# 		vertex.size=5,vertex.label.cex=.5,vertex.label.family='sans',
+# 		vertex.color=NA,vertex.frame.color=NA)
+# 	dev.off()
+                               
+    model_sel = Model_Score_Groups[,1]*Model_Score_Groups[,2]
+    score_order=order(tmp<-(Model_Scores[,1]+Model_Scores[,2])/2,decreasing=F)
+                               
+    w=700; h=700; lab.cex=.5; lab.sz=5
+
+	png('figures/movie/0.networks.prob.enrich.movie.png',width=w,height=h,bg="transparent")
+                               
+    Model_Scores=attach.big.matrix('Model_Scores.desc')
+                              
+	#par(mfrow=c(1,2),mar=c(0,0,0,0))
+    par(mar=c(0,0,0,0))
+
+	plot(g,layout=lay,
+		edge.width=E(g)$weight*5,edge.arrow.size=0,edge.color=E(g)$color,
+		vertex.size=lab.sz,vertex.label.cex=lab.cex,vertex.label.family='sans',
+         vertex.frame.color=NA,
+		vertex.color=NA,vertex.label.color='white')
+    title(main="\n\nReduced Network",col.main='white')
+                               
+    legend(x = "bottomright",#inset = 0,
+        legend = c('b1,3-Galactose','b1,4-Galactose','a1,2-Fucose','a1,3-Fucose','a1,4-Fucose','b1,3-GlcNAc','b1,6-GlcNAc','a2,3-Sialic Acid','a2,6-Sialic Acid'),
+        lty=c(1,2,1,2,3,1,2,1,2),
+        col=c('gold3','gold3','red','red','red','blue','blue','purple','purple'), lwd=3,box.lwd = 0,box.col = "white",bg = "white") #, cex=.5) #, horiz = TRUE)
+
+    dev.off()
+                               
+    # score-ordered models
+    counter=1
+    start_time <- Sys.time()
+
+    for(i in score_order  ){
+        if(i%%1e5==0 | (model_sel[i]==1 & i%%1e3==0)){
+            png(paste0('figures/movie/',counter,'.networks.prob.enrich.movie.png'),width=w,height=h,bg="transparent")
+
+            #print(i)
+            idx=which(inclusion[-attr(el_na,'na.action'),i]==1)
+            idx_v = as.numeric(V(g)[sort(unique(as.vector(ends(g,E(g)[idx]))))])
+            #g2=subgraph.edges(g,E(g)[idx])
+            g2=induced_subgraph(g,V(g)[idx_v])
+            plot(g2,#layout=layout_as_tree(g2),
+                layout=lay[idx_v,],edge.width=5,
+                #edge.width=E(g2)$weight*5,
+                edge.arrow.size=0,edge.color=E(g2)$color,
+                vertex.size=lab.sz,vertex.label.cex=lab.cex,vertex.label = NA, #V(g2)$label_all,
+                vertex.label.family='sans',
+                vertex.color=NA,vertex.frame.color=NA)
+            title(ifelse(model_sel[i]==1, paste("Common High-Performer - Model Score:",signif(tmp[i],5)),paste("Candidate - Model Score:",signif(tmp[i],5))), 
+                col.main='white')
+            dev.off(); counter=counter+1
+        }
+    }
+    print(Sys.time() - start_time)
+                               
+    # summary netowrk
+    png(paste0('figures/movie/',counter,'.networks.prob.enrich.movie.png'),width=w,height=h,bg="transparent")
+
+	idx=which(V(g)$frame.color=='black')
+	g2=induced_subgraph(g,V(g)[idx])
+	plot(g2,layout=layout_as_tree(g2), 
+        #layout=lay[idx,],
+		edge.width=E(g2)$weight*5,edge.arrow.size=0,edge.color=E(g2)$color,
+		vertex.size=10,vertex.label.cex=.8,vertex.label = V(g2)$label_all,vertex.label.family='sans',
+		vertex.color=NA,vertex.frame.color=NA,vertex.label.color='white')
+    title("Summary Network", col.main='white')
+                               
+    legend(x = "bottomright",#inset = 0,
+        legend = c('b1,3-Galactose','b1,4-Galactose','a1,2-Fucose','a1,3-Fucose','a1,4-Fucose','b1,3-GlcNAc','b1,6-GlcNAc','a2,3-Sialic Acid','a2,6-Sialic Acid'),
+        lty=c(1,2,1,2,3,1,2,1,2),
+        col=c('gold3','gold3','red','red','red','blue','blue','purple','purple'), lwd=3,box.lwd = 0,box.col = "white",bg = "white") #, cex=.5) #, horiz = TRUE)
+	dev.off()
+}
 
 # padj = apply( Model_Scores , 2, function(x) fdrtool(pnorm(as.vector(scale(na.omit(x))),lower.tail=F),statistic='pvalue' ))
 
@@ -2538,9 +2722,11 @@ if(aggregate_GC){
 	# colnames(df2)=c('Linkage','Link','Gene','Pr')
 	df2$fdr = p.adjust(df2$Pr,'fdr')
 
+    ##########################################################################
 	###  add indication of non-expressed genes 
 	df2=rbind(df2,data.frame(Linkage=c('L5','L9'),Link=c('ST6Gal','a4FucT'),Gene=c('ST6GAL2','FUT5'),Pr=c(1,1),fdr=c(1,1)))
-
+    ##########################################################################
+    ##########################################################################
 
 	labi = factor(paste(df2$Linkage,df2$Link,sep='_') )
 	ord =  order(unlist(lapply(strsplit(levels(labi),'_'),function(x) as.numeric(gsub('L','',x[1])) )))

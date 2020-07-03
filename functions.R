@@ -93,18 +93,27 @@ load_linkages<-function(){
 		L10_ST6GnT_gene =c('ST6GALNAC1','ST6GALNAC2','ST6GALNAC4a','ST6GALNAC6'))
 }
 
+# b3gnt6 (zero expression in rnaseq, remove) and b4galt5 failed during flux correlation and were therefore excluded
+
 linkage_update<-function(linkage_orig){
 	lapply(names(linkage_orig),function(xn){
 	        x = linkage_orig[[xn]]
-	        #if(grepl('L3_|L9',xn)){
 	        if(grepl('L3_',xn)){
-	                rm_genes_i = c(rm_genes,"FUT2")
+	                rm_genes_i = c(rm_genes,"FUT2","FUT8")
+	        }else if(grepl('L2_',xn)){
+	                rm_genes_i = c(rm_genes,'FUT11','FUT3','FUT4','FUT6b','FUT8')
 	        }else if(grepl('L9_',xn)){
-	                rm_genes_i = c(rm_genes,"FUT2",'FUT4','FUT11','FUT6b')
-#	        }else if(grepl('L4_',xn)){
-#	                rm_genes_i = c(rm_genes,"ST3GAL1a")
-#	        }else if(grepl('L6_',xn)){
-#	                rm_genes_i = c(rm_genes,"B3GALNT2")
+	                rm_genes_i = c(rm_genes,'FUT11',"FUT2",'FUT4','FUT11','FUT6b')
+	        }else if(grepl('L1_',xn)){
+	                rm_genes_i = c(rm_genes,'B3GNT4','B3GNTL1')
+	        }else if(grepl('L4_',xn)){
+	                rm_genes_i = c(rm_genes,'ST3GAL2','ST3GAL4')
+	        }else if(grepl('L6_',xn)){
+	                rm_genes_i = c(rm_genes,'B3GALNT2','B3GALT6') # B3GALT5 is borderline, should it be excluded?
+	        }else if(grepl('L7_',xn)){
+	                rm_genes_i = c(rm_genes,'B4GALNT4','B4GALT6','B4GALT7')
+	        }else if(grepl('L10_',xn)){
+	                rm_genes_i = c(rm_genes,'ST6GALNAC1')
 	        }else{
 	                rm_genes_i = rm_genes
 	        }
