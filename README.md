@@ -29,7 +29,7 @@ To run code, please first update paths. To make the codebase easier to understan
 ### 1) Flux analysis (runtime: at least 1 month; macbook pro 16G RAM, 8 cores)
 - code/1.flux/A_\*/MAINCODE_\* builds the complete HMO biosynthesis network using the fundamental reactions then trims the complete network using FVA to remove irrelevant reactions producing the reduced network (code/1.flux/B_*/Network_Red_ext.mat)
 - code/1.flux/B_\*/parallel_enumerationSubNetworks.m runs a Mixed Integer Linear Program to enumerate every unique & minimal network within the reduced HMO biosynthetic network. FBA was run on each unique network to estimate flux.
-- code/1.flux/C_\*/parallel_correlations.m computes the correlation between FBA estimted flux for each model (normalized to the flux of immidiate upstream reactions) and the gene expression of corresponding candidate genes. <R/P>_data<i>_C<n-m>.mat are example files from a subset of models of the output correlation and p-values provided through zenodo for all models
+- code/1.flux/C_\*/parallel_correlations.m computes the correlation between FBA estimted flux for each model (normalized to the flux of immidiate upstream reactions) and the gene expression of corresponding candidate genes. <R/P>_data*_C.mat are example files from a subset of models of the output correlation and p-values provided through zenodo for all models*
 
 ### 2) Expression Analysis and Gene Filtering (runtime: <1 min after loading GTEx; HP Z620, 96G RAM, 32 cores, Intel Xeon CPU E5-2670 @ 2.6GHz )
 - code/2.expression/GeneInclusion.ipynb code demonstrating the criteria and analysis used to filter gene candidates prior to the flux-expression comparison. (GTEx expression data should be downloaded to run this code, see code for the specific version)
