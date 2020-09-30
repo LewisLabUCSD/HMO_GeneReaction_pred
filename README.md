@@ -6,6 +6,14 @@ Elucidating Human Milk Oligosaccharide biosynthetic genes through network-based 
 Benjamin P. Kellman, Anne Richelle, Jeong-Yeh Yang, Digantkumar Chapla, Austin W. T. Chiang, Julia Najera, Bokan Bao, Natalia Koga, Mahmoud A. Mohammad, Anders Bech Bruntse, Morey W. Haymond, Kelley W. Moremen, Lars Bode, Nathan E. Lewis
 bioRxiv 2020.09.02.278663; doi: https://doi.org/10.1101/2020.09.02.278663
 
+## Dependencies
+- Hardware
+  - Flux Analysis: macbook pro 16G RAM, 8 cores
+  - Flux-Expression Analysis: HP Z620, 96G RAM, 32 cores, Intel Xeon CPU E5-2670 @ 2.6GHz
+- Software
+  - Flux Analysis: Matlab 2016b, Cobratoolbox 3.0
+  - Flux-Expression Analysis: see code/R.env 
+
 ## Data
 - Source data (data/data_raw)
   - Formatted data (data/data_raw/HMO_expss.xlsx): Expression data: Cohort 1 (GSE36936), Cohort 2 (GSE12669), HMO Concentration data: Cohort 1 (DOI:10.1101/693507), Cohort 2 (DOI:10.1101/2020.09.02.278663)
@@ -26,15 +34,15 @@ The codebase is split into three sections: flux analysis, expression analysis an
 
 To run code, please first update paths. To make the codebase easier to understand, we have moved several files from their original position in the file structure.
 
-### 1) Flux analysis (runtime: at least 1 month; macbook pro 16G RAM, 8 cores)
+### 1) Flux analysis (runtime: at least 1 month)
 - code/1.flux/A_\*/MAINCODE_\* builds the complete HMO biosynthesis network using the fundamental reactions then trims the complete network using FVA to remove irrelevant reactions producing the reduced network (code/1.flux/B_*/Network_Red_ext.mat)
 - code/1.flux/B_\*/parallel_enumerationSubNetworks.m runs a Mixed Integer Linear Program to enumerate every unique & minimal network within the reduced HMO biosynthetic network. FBA was run on each unique network to estimate flux.
 - code/1.flux/C_\*/parallel_correlations.m computes the correlation between FBA estimted flux for each model (normalized to the flux of immidiate upstream reactions) and the gene expression of corresponding candidate genes. <R/P>_data*_C.mat are example files from a subset of models of the output correlation and p-values provided through zenodo for all models*
 
-### 2) Expression Analysis and Gene Filtering (runtime: <1 min after loading GTEx; HP Z620, 96G RAM, 32 cores, Intel Xeon CPU E5-2670 @ 2.6GHz )
+### 2) Expression Analysis and Gene Filtering (runtime: <1 min after loading GTEx )
 - code/2.expression/GeneInclusion.ipynb code demonstrating the criteria and analysis used to filter gene candidates prior to the flux-expression comparison. (GTEx expression data should be downloaded to run this code, see code for the specific version)
 
-### 3) Flux-Expression Comparison: Model and Gene Selection (runtime: 7-30 days; HP Z620, 96G RAM, 32 cores, Intel Xeon CPU E5-2670 @ 2.6GHz)
+### 3) Flux-Expression Comparison: Model and Gene Selection (runtime: 7-30 days)
 - code/3.flux_expression/A_permuted_background/calc_null_distr.r calculates the random background used to estimate the signifiance of the support score
 - code/3.flux_expression/B_largeModel_code_par.r uses the prior calculations to determine the consistency between estimate flux and candidate gene expression.
   - run_GLS: calculates the Gene-Linkage Score (GLS) for each reaction across all models
