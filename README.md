@@ -19,7 +19,7 @@ Other files are .csv exports from data_HMO.xlsx to circumvent a temporary bug in
   - (scores_spllit.zip) Correlation (R) and correlation p-values (P) between estimated flux and observed gene expression for corresponding genes (<github>/code/1.flux/C)
   - (big_mat.<bin/desc>.zip) Intermediate matrixes containing gene-linkage scores, models score, model classifications and other information generated/used by the Flux-Expression Comparision code (<github>/code/3.flux_expression)
 - Output data (data/data_out)
-  - **Todo**
+  - Summary statistics including preference, and enrichemnt for genes across fundamental linkage reactions and aggregate model scores. These data are parsed and presented in table S2 of the corresponding publication (https://doi.org/10.1101/2020.09.02.278663)
 
 ## Code
 The codebase is split into three sections: flux analysis, expression analysis and Flux-Expression Comparison. The code was written and run over several years and uses multiple packages. We have prioritized completeness in sharing this codebase to ensure our methods are as fully specified as possible. However, due to the completeness of the codebase and the length of runtimes, we have not been able to dockerize and reproduction will be non-trivial. To minimize the challenge, we have provided all intermediate calculations through zenodo. We are happy to provide support if necessary.
