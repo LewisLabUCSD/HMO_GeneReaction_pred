@@ -19,8 +19,8 @@ bioRxiv 2020.09.02.278663; doi: https://doi.org/10.1101/2020.09.02.278663
   - Formatted data (data/data_raw/HMO_expss.xlsx): Expression data: Cohort 1 (GSE36936), Cohort 2 (GSE12669), HMO Concentration data: Cohort 1 (DOI:10.1101/693507), Cohort 2 (DOI:10.1101/2020.09.02.278663)
   - MIRAGE Annotation (data/data_raw/MIRAGE-1601485787699.xlsx): MIRAGE complient description of HPLC methods
   - HPLC measured HMO abundance has also been shared on Glycopost (**TBD**)
-  - The exact raw data used is shared through zenodo ( doi: **TBD**)
-- Exact raw/intermediate data files used ( zendodo doi: **TBD**)
+  - The exact raw data used is shared through zenodo ( doi: 10.5281/zenodo.4060217 )
+- Exact raw/intermediate data files used ( zenodo doi: 10.5281/zenodo.4060217 )
   - Raw/Input data (raw.zip); data_HMO.xlsx is the central dataset including HMO concentrations and gene expression data. 
 Other files are .csv exports from data_HMO.xlsx to circumvent a temporary bug in the xlsx reading package. They should not differ from the original file and are provided to facilitate code readability.
   - (models_split.zip) HMO biosynthesis models generated through network generation ( <github>/code/1.flux/A) and enumeration (<github>/code/1.flux/B)
