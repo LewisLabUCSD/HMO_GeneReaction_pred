@@ -11,7 +11,7 @@ bioRxiv 2020.09.02.278663; doi: https://doi.org/10.1101/2020.09.02.278663
   - Flux Analysis: macbook pro 16G RAM, 8 cores
   - Flux-Expression Analysis: HP Z620, 96G RAM, 32 cores, Intel Xeon CPU E5-2670 @ 2.6GHz
 - Software
-  - Flux Analysis: Matlab 2016b, Cobratoolbox 3.0
+  - Flux Analysis: Matlab 2016b, Cobratoolbox v2
   - Flux-Expression Analysis: see code/R.env 
 
 ## Data
