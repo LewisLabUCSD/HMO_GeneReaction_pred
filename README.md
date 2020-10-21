@@ -30,7 +30,7 @@ Other files are .csv exports from data_HMO.xlsx to circumvent a temporary bug in
   - Summary statistics including preference, and enrichemnt for genes across fundamental linkage reactions and aggregate model scores. These data are parsed and presented in table S2 of the corresponding publication (https://doi.org/10.1101/2020.09.02.278663)
 
 ## Code
-The codebase is split into three sections: flux analysis, expression analysis and Flux-Expression Comparison. The code was written and run over several years and uses multiple packages. We have prioritized completeness in sharing this codebase to ensure our methods are as fully specified as possible. However, due to the completeness of the codebase and the length of runtimes, we have not been able to dockerize and reproduction will be non-trivial. To minimize the challenge, we have provided all intermediate calculations through zenodo. We are happy to provide support if necessary.
+The codebase is split into three sections: flux analysis, expression analysis and Flux-Expression Comparison. To minimize the challenge of reproducing our calculations, we have provided all intermediate calculations through zenodo. 
 
 To run code, please first update paths. To make the codebase easier to understand, we have moved several files from their original position in the file structure.
 
